@@ -17,7 +17,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} /> {/* Changed to Navigate to login */}
         <Route path="/wellness" element={<Wellness />} />
-        <Route path="/friends" element={<Friends />} />
+        
         <Route path="/study" element={<Study />} />
         <Route path="/profile/avatar" element={<Avatar />} />
         <Route path="/profile/editprofile" element={<EditProfile />} />

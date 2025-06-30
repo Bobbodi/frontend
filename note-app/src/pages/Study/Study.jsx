@@ -9,6 +9,7 @@ import StudyCard from '../../components/Cards/StudyCard';
 import NoteCard from '../../components/Cards/NoteCard';
 import Modal from "react-modal";
 import AddEditNotes from '../Home/AddEditNotes';
+import StudySuggested from './StudySuggested';
 
 //images
 import Star from "../../assets/images/star.png"
@@ -30,22 +31,36 @@ import { Model } from "../../../public/3_06AM";
 const Study = () => {
     const [userInfo, setUserInfo] = useState(null); 
     const [allNotes, setAllNotes] = useState([]);
+    const [suggestedNotes, setSuggestedNotes] = useState([]); 
+    
     const [hoveredNoteId, setHoveredNoteId] = useState(null);
     const [isTimerRunning, setIsTimerRunning] = useState(false);
     const [elapsedTime, setElapsedTime] = useState(0);
     const [completedTasks, setCompletedTasks] = useState([]);
     const timerRef = useRef(null);
     const tasksContainerRef = useRef(null);
+    const [error, setError] = useState(null); 
+
     const navigate = useNavigate();
     const [isPaused, setIsPaused] = useState(false);
 
-    useEffect(() => { 
-        getUserInfo(); 
-        getAllNotes();
-        return () => {
-            if (timerRef.current) clearInterval(timerRef.current);
-        };
+    const [studyStart, setStudyStart] = useState(null); 
+    const [studyEnd, setStudyEnd] = useState(null); 
+
+    useEffect(() => {
+    const fetchData = async () => {
+        await getUserInfo();
+        await getAllNotes();
+    };
+    fetchData();
     }, []);
+
+    useEffect(() => {
+        if (allNotes.length > 0) {
+            getSuggestions();
+        }
+    }, [allNotes]);
+
 
     const getUserInfo = async () => { 
         try { 
@@ -126,6 +141,7 @@ const Study = () => {
         }
     };
 
+    //can use updateIsDone to format the whenDone of the Note 
     const updateIsDone = async (note) => {
         const noteId = note._id;
         try {
@@ -137,7 +153,7 @@ const Study = () => {
                     n._id === note._id ? { ...n, isDone: true } : n
                 ));
                 if (isTimerRunning) {
-                    setCompletedTasks(prev => [...prev, note.title]);
+                    setCompletedTasks(prev => [...prev, note]);
                 }
             }
         } catch (error) {
@@ -147,6 +163,8 @@ const Study = () => {
 
     const startTimer = () => {
         setIsTimerRunning(true);
+        setStudyStart(Date.now()); 
+        setCompletedTasks([])
         setIsPaused(false);
         setElapsedTime(0);
         timerRef.current = setInterval(() => {
@@ -184,188 +202,190 @@ const Study = () => {
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
+    // TODO: Add session record to database 
+    const studyRoom = 1; 
+    const addStudySession = async () => { 
+        try { 
+            
+
+            const studyEnd = Date.now(); 
+
+            console.log("HERE2");
+            console.log(typeof studyStart);
+            console.log(studyStart);
+            console.log(typeof studyEnd);
+            console.log(studyEnd);
+            console.log(typeof elapsedTime);
+            console.log(elapsedTime);
+            console.log(typeof completedTasks);
+            console.log(completedTasks);
+            console.log(typeof studyRoom);
+            
+            const response = await axiosInstance.post("/add-study-session", { 
+                studyStart, 
+                studyEnd,
+                elapsedTime,
+                completedTasks,
+                studyRoom,
+            })
+
+            if (response.data && response.data.studyLog) { 
+                //getAllJournal()
+                showToastMessage("Study Session Logged Succesfully", 'add')
+                onClose()
+            } 
+
+        } catch (error) { 
+            if (error.response && error.response.data && error.response.data.message) { 
+                setError(error.response.data.message)
+            }
+        }
+        
+    } 
+
     const endSession = () => { 
         stopTimer();
-        // TODO: Add session record to database 
+        addStudySession(); 
     }
 
+    //to load the your tasks section and use the SeeSuggestedTasks
+    const getSuggestions = async () => {
+        try {
+            const tasks = allNotes.filter(note => !note.isDone);
+            const response = await axiosInstance.post('/api/suggest-priority-notes', { tasks:  tasks });
+    
+            if (response.data.result) {
+                // set the full note objects for the suggested titles
+                setSuggestedNotes(response.data.result);
+                
+            }
+        } catch (error) {
+            console.error("Error getting suggestions:", error);
+        } 
+    };
+
     return (
-        <>
-            <Navbarv3 userInfo={userInfo} />
+  <>
+    <Navbarv3 userInfo={userInfo} />
 
-            <div className="container mx-auto px-4 py-8">
-                <div className="flex flex-row gap-4 w-full max-h-100">
-                    {/* Left Column - Tasks (25%) */}
-                    <div className="w-1/3 bg-white rounded-xl shadow-md p-4">
-                        <h3 className="text-xl font-semibold mb-4">Your Tasks</h3>
-                        {allNotes.filter(note => !note.isDone).length > 0 ? (
-                            <div 
-                                ref={tasksContainerRef}
-                                className="grid grid-cols-1 gap-4 max-h-70 overflow-y-auto p-2"
-                                style={{ scrollbarWidth: 'none' }}
-                            >
-                                {allNotes
-                                    .filter(note => !note.isDone)
-                                    .map((item) => (
-                                        <div key={item._id} className="h-full">
-                                            <NoteCard 
-                                                title={item.title}
-                                                date={item.createdOn}
-                                                content={item.content}
-                                                priority={item.priority}
-                                                dueDate={item.dueDate}
-                                                tags={item.tags}
-                                                isDone={item.isDone}
-                                                onEdit={() => handleEdit(item)}
-                                                onDelete={() => deleteNote(item)}
-                                                onDoneNote={() => updateIsDone(item)}
-                                                hovered={hoveredNoteId===item._id}
-                                                onMouseEnter={() => setHoveredNoteId(item._id)}
-                                                onMouseLeave={() => setHoveredNoteId(null)}
-                                            />
-                                        </div>
-                                    ))}
-                            </div>
-                        ) : (
-                            <SmallEmptyCard 
-                            imgSrc={Star} 
-                            message="All done!"
-                            />
-                        )}
-                    </div> 
-
-                    {/* Middle Column - Timer (50%) */}
-                    <div className={`p-4 bg-yellow-700 rounded-lg flex flex-col items-center ${isTimerRunning ? "w-1/2" : "w-2/3"}`}>
-                        <div className="w-full max-w-md">
-                            <div className="flex flex-row items-center justify-center gap-3">
-                                <span className="text-5xl font-mono mb-2">{formatTime(elapsedTime)}</span>
-                                
-                            
-
-                            <div className="flex flex-row items-center justify-center gap-4 mb-2">
-                                {!isTimerRunning ? (
-                                    <button
-                                        onClick={startTimer}
-                                        className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors"
-                                    >
-                                        START
-                                    </button>
-                                ) : (
-                                    <>
-                                        <button 
-                                            onClick={togglePause}
-                                            className="px-6 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg flex items-center gap-2"
-                                        >
-                                            {isPaused ? <FaPlay /> : <FaPause />}
-                                            {isPaused ? "RESUME" : "PAUSE"}
-                                        </button>
-                                        <button
-                                            onClick={endSession}
-                                            className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg transition-colors"
-                                        >
-                                            END
-                                        </button>
-                                    </>
-                                )}
-                            </div>
-                            </div>
-                        </div>
-
-                        <div className="w-full min-h-70 bg-gray-100">
-                        <Canvas camera={{ fov: 64, position: [5, 5, 20] }}>
-                                
-                                <ambientLight intensity={5} />
-                                <OrbitControls enableZoom={true} />
-                                <Model />
-                                <Environment preset='sunset'/>
-                                <ContactShadows opacity={0.5} scale={100} blur={1} far={10} resolution={256} color="#000000" />
-                        
-                        </Canvas>
-                        </div> 
-
-                    </div>
-
-                    {isTimerRunning ? (
-                        <div className="w-1/6 bg-white rounded-xl shadow-md p-4">
-                            <h3 className="text-xl font-semibold mb-4">History</h3>
-                            {completedTasks.length > 0 ? (
-                                <div className="mt-4">
-                                    <h3 className="font-semibold mb-2">Tasks completed:</h3>
-                                    <ul className="list-disc pl-5 space-y-1">
-                                        {completedTasks.map((task, index) => (
-                                            <li key={index} className="text-gray-700">{task}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            ) : (
-                                <p className="text-gray-500">No tasks completed yet</p>
-                            )}
-                        </div>
-                    ) : null}
-                </div>
-            </div>
-
-        {/* Add Button */}
-        <button
-            className="fixed w-16 h-16 flex items-center justify-center rounded-full bottom-10 right-10 bg-yellow-500 hover:bg-yellow-700 text-white shadow-lg hover:shadow-xl transition-all z-50"
-            onClick={() => {
-            setOpenAddEditModal({
-                isShown: true,
-                type: "add",
-                data: null,
-            });
-            }}
-            aria-label="Add new note"
-        >
-            <MdAdd className="text-3xl" />
-        </button>
-
-        {/* Modal */}
-         <Modal 
-            isOpen={openAddEditModal.isShown}
-            onRequestClose={() => setOpenAddEditModal({ isShown: false, type: "add", data: null })}
-            style={{
-                overlay: {
-                    backgroundColor: "rgba(0, 0, 0, 0.5)",
-                    zIndex: 1000
-                },
-                content: {
-                    maxHeight: "90vh",
-                    
-                    borderRadius: "0.5rem",
-                    padding: "0",
-                    border: "none",
-                    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
-                }
-            }}
-            contentLabel="Add/Edit Note"
-            className="w-[45%] max-w-3xl overflow-scroll"
-            overlayClassName="fixed inset-0 flex items-center justify-center p-4"
-            
-        >
-            <AddEditNotes 
-                type={openAddEditModal.type}
-                nodeData={openAddEditModal.data}
-                getAllNotes={getAllNotes}
-                onClose={() => { 
-                    setOpenAddEditModal({ isShown:false, type:"add", data:null});
-                }}
-                showToastMessage={showToastMessage}
-            />
-
-        </Modal>
-
-        <Toast
-            isShown={showToastMsg.isShown}
-            message={showToastMsg.message}
-            type={showToastMsg.type}
-            onClose={handleCloseToast}
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex flex-row gap-4 w-full">
+        
+        {/* Left Column - Tasks (25%) */}
+        <StudySuggested 
+          nodeData={suggestedNotes}
+          getSuggestions={getSuggestions}
         />
-        </>
-    );
-};
 
-export default Study;
+        {/* Middle Column - Timer */}
+        <div className={`p-6 bg-white rounded-2xl flex flex-col items-center ${isTimerRunning ? "w-1/2" : "w-2/3"}`}>
+          
+          <div className="flex flex-row items-center justify-between gap-6"> 
+            <span className="text-6xl font-mono font-bold text-gray-800">
+              {formatTime(elapsedTime)}
+            </span>
+
+            
+              {!isTimerRunning ? (
+                <button
+                  onClick={startTimer}
+                  className="px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white text-lg font-semibold rounded-full shadow transition duration-200"
+                >
+                  START
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={togglePause}
+                    className={`px-6 py-3 ${
+                      isPaused ? "bg-green-500 hover:bg-green-600" : "bg-gray-500 hover:bg-gray-600"
+                    } text-white text-lg font-medium rounded-full flex items-center gap-2 shadow transition duration-200`}
+                  >
+                    {isPaused ? <FaPlay /> : <FaPause />}
+                    {isPaused ? "RESUME" : "PAUSE"}
+                  </button>
+
+                  <button
+                    onClick={endSession}
+                    className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white text-lg font-semibold rounded-full shadow transition duration-200"
+                  >
+                    END
+                  </button>
+                </>
+              )}
+        </div> 
+            
+       <div className="flex items-center justify-between h-120 w-full">
+
+        <Canvas camera={{ fov: 7, position: [100, 0, 100] }}>
+            <ambientLight intensity={5} />
+            <OrbitControls
+            enableZoom={false}
+            minAzimuthAngle={-Math.PI / 2} // -90 degrees
+            maxAzimuthAngle={Math.PI / 2}  // +90 degrees
+            minPolarAngle={Math.PI / 2.5}  // optional: limit up/down tilt
+            maxPolarAngle={Math.PI / 2.5}  // optional: lock vertical angle
+            />
+            <Model />
+            <Environment preset="sunset" />
+            <ContactShadows
+            opacity={0.5}
+            scale={100}
+            blur={1}
+            far={10}
+            resolution={256}
+            color="#000000"
+            />
+        </Canvas>
+        </div> 
+        </div>
+
+      </div>
+    </div>
+
+    {/* Modal */}
+    <Modal
+      isOpen={openAddEditModal.isShown}
+      onRequestClose={() => setOpenAddEditModal({ isShown: false, type: "add", data: null })}
+      style={{
+        overlay: {
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          zIndex: 1000
+        },
+        content: {
+          maxHeight: "90vh",
+          borderRadius: "0.5rem",
+          padding: "0",
+          border: "none",
+          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+        }
+      }}
+      contentLabel="Add/Edit Note"
+      className="w-[45%] max-w-3xl overflow-scroll"
+      overlayClassName="fixed inset-0 flex items-center justify-center p-4"
+    >
+      <AddEditNotes
+        type={openAddEditModal.type}
+        nodeData={openAddEditModal.data}
+        getAllNotes={getAllNotes}
+        onClose={() => {
+          setOpenAddEditModal({ isShown: false, type: "add", data: null });
+        }}
+        showToastMessage={showToastMessage}
+      />
+    </Modal>
+
+    <Toast
+      isShown={showToastMsg.isShown}
+      message={showToastMsg.message}
+      type={showToastMsg.type}
+      onClose={handleCloseToast}
+    />
+  </>
+);
+}
+
+export default Study; 
 
  {/* Completed task list
                       
@@ -495,3 +515,55 @@ export default Study;
 // }
 
 // export default Study
+// {allNotes.filter(note => !note.isDone).length > 0 ? (
+// <div 
+//     ref={tasksContainerRef}
+//     className="grid grid-cols-1 gap-4 max-h-70 overflow-y-auto p-2"
+//     style={{ scrollbarWidth: 'none' }}
+// >
+//     {allNotes
+//         .filter(note => !note.isDone)
+//         .map((item) => (
+//             <div key={item._id} className="h-full">
+//                 <NoteCard 
+//                     title={item.title}
+//                     date={item.createdOn}
+//                     content={item.content}
+//                     priority={item.priority}
+//                     dueDate={item.dueDate}
+//                     tags={item.tags}
+//                     isDone={item.isDone}
+//                     onEdit={() => handleEdit(item)}
+//                     onDelete={() => deleteNote(item)}
+//                     onDoneNote={() => updateIsDone(item)}
+//                     hovered={hoveredNoteId===item._id}
+//                     onMouseEnter={() => setHoveredNoteId(item._id)}
+//                     onMouseLeave={() => setHoveredNoteId(null)}
+//                 />
+//             </div>
+//         ))}
+// </div>
+// ) : (
+// <SmallEmptyCard 
+// imgSrc={Star} 
+// message="All done!"
+// />
+// )}
+
+// {isTimerRunning ? (
+//     <div className="w-1/6 bg-white rounded-xl shadow-md p-4">
+//         <h3 className="text-xl font-semibold mb-4">History</h3>
+//         {completedTasks.length > 0 ? (
+//             <div className="mt-4">
+//                 <h3 className="font-semibold mb-2">Tasks completed:</h3>
+//                 <ul className="list-disc pl-5 space-y-1">
+//                     {completedTasks.map((task, index) => (
+//                         <li key={index} className="text-gray-700">{task.title}</li>
+//                     ))}
+//                 </ul>
+//             </div>
+//         ) : (
+//             <p className="text-gray-500">No tasks completed yet</p>
+//         )}
+//     </div>
+// ) : nul

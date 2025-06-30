@@ -7,12 +7,12 @@ import { getRelativeDate } from "../../utils/helper.js"
 import { useState } from 'react'
 import Modal from "react-modal";
 import NoteCard from "../../components/Cards/NoteCard";
-import AddEditNotes from "./AddEditNotes";
+import AddEditNotes from '../Home/AddEditNotes.jsx'
 import Toast from "../../components/ToastMessage/Toast";
-
+import { MdAdd } from "react-icons/md";
 import axiosInstance from "../../utils/axiosInstance";
 
-const SeeAllSuggested = ({ nodeData, type, getSuggestions, onClose }) => {
+const StudySuggested = ({ nodeData, type, getSuggestions, onClose }) => {
 
     if (!nodeData) return null; 
 
@@ -105,10 +105,11 @@ const SeeAllSuggested = ({ nodeData, type, getSuggestions, onClose }) => {
     }
     
     const length = nodeData ? Object.keys(nodeData).length : 0;
-    console.log(nodeData); 
+   
     return (
     <>
-    <div className="relative justify-center bg-white p-1 rounded-3xl border-2 border-gray-200 shadow-md w-full">
+    {/* relative justify-center p-1 rounded-3xl border-2 border-gray-200 */}
+    <div className="max-w-99">
       
       {/*show all notes schedule */}
       {length > 0 
@@ -120,7 +121,7 @@ const SeeAllSuggested = ({ nodeData, type, getSuggestions, onClose }) => {
             {Object.entries(nodeData)
             .sort(([dateA], [dateB]) => new Date(dateA) - new Date(dateB))
             .map(([dateString, tasks]) =>  (
-            <div className="bg-gray-100 p-5 m-3 rounded-3xl border-2 border-gray-200 shadow-xl"> 
+            <div className="max-w-100 bg-white-100 p-5 mb-3 ml-3 rounded-3xl border-2 border-gray-200"> 
                 <p className="text-2xl font-bold text-gray-800 mb-5">
                     {getRelativeDate(dateString)}
                 </p>
@@ -207,8 +208,24 @@ const SeeAllSuggested = ({ nodeData, type, getSuggestions, onClose }) => {
         type={showToastMsg.type}
         onClose={handleCloseToast}
     />
+
+
+    {/* Add Button */}
+    <button
+        className="absolute w-12 h-12 flex items-center justify-center rounded-full top-32 left-85 bg-yellow-500 hover:bg-yellow-700 text-white shadow-lg hover:shadow-xl transition-all z-50"
+        onClick={() => {
+        setOpenAddEditModal({
+            isShown: true,
+            type: "add",
+            data: null,
+        });
+        }}
+        aria-label="Add new note"
+    >
+        <MdAdd className="text-3xl" />
+    </button>
     </>
   )
 }
 
-export default SeeAllSuggested
+export default StudySuggested

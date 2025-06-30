@@ -70,18 +70,15 @@ const Signup = () => {
           </p>
           <ul className="space-y-3">
             <li className="flex items-center">
-              <span className="mr-2">✓</span> AI-assisted study planning
+              <span className="mr-2">✓</span> Study planning
             </li>
             <li className="flex items-center">
-              <span className="mr-2">✓</span> Virtual + Customisable study rooms
+              <span className="mr-2">✓</span> Study rooms
             </li>
             <li className="flex items-center">
-              <span className="mr-2">✓</span> Wellness tools: journaling, mood + sleep trackers
+              <span className="mr-2">✓</span> Wellness tools
             </li>
           </ul>
-          <p className="text-xl my-6">
-            Voted #1 hottest product by Sreya and YX
-          </p>
         </div>
       </div>
 

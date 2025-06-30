@@ -86,11 +86,11 @@ const Navbar = ({userInfo, onSearchNote, handleClearSearch}) => {
         userInfo={userInfo}
         onLogout={onLogout}
         onProfile={onProfile}
-        onFriends={onFriends}
+        //onFriends={onFriends}
         onWellness={onWellness}
         onStudy={onStudy}
         onTasks={onTasks}
-        isFriends={location.pathname === "/friends"}
+        //isFriends={location.pathname === "/friends"}
         isWellness={location.pathname === "/wellness"}
         isStudy={location.pathname === "/study"}
         isTasks={location.pathname === "/dashboard"}
