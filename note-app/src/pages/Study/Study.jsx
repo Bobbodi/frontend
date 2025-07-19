@@ -2,36 +2,47 @@ import React, { useState, useEffect, useRef } from 'react';
 import Navbarv3 from '../../components/Navbarv3';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
+import { getSuggestions } from '../../utils/helper.js';
+import { EMOJIS } from '../../utils/constants.js';
 
 //components
-import SmallEmptyCard from '../../components/EmptyCard/SmallEmptyCard';
-import StudyCard from '../../components/Cards/StudyCard';
-import NoteCard from '../../components/Cards/NoteCard';
+import { Room1Model } from '../../components/3D models/Room1Model.jsx';
+import { DogModel } from '../../components/3D models/DogModel.jsx';
+import { BeeModel } from '../../components/3D models/BeeModel.jsx';
+import { AxolotlModel } from '../../components/3D models/AxolotlModel.jsx';
+import { CamelModel } from '../../components/3D models/CamelModel.jsx';
+import { CentaurModel } from '../../components/3D models/CentaurModel.jsx';
+import { CowModel } from '../../components/3D models/CowModel.jsx';
+import { GoatModel } from '../../components/3D models/GoatModel.jsx';
+import { MonsterModel } from '../../components/3D models/MonsterModel.jsx';
+import { PigmanModel } from '../../components/3D models/PigmanModel.jsx';
+import { RainbowDragonModel } from '../../components/3D models/RainbowDragonModel.jsx';
+import { SharkModel } from '../../components/3D models/SharkModel.jsx';
+
 import Modal from "react-modal";
 import AddEditNotes from '../Home/AddEditNotes';
 import StudySuggested from './StudySuggested';
 
 //images
-import Star from "../../assets/images/star.png"
 import Toast from '../../components/ToastMessage/Toast';
-import AddNotesImg from "../../assets/images/cat.png";
 
 //icons
 import { MdAdd } from "react-icons/md";
 import { FaPause, FaPlay } from "react-icons/fa6";
-
-
+import { IoCaretBackOutline, IoCaretForwardOutline } from "react-icons/io5"
 
 //SHOW STUDY ROOM (just sample file)
 import { Canvas } from "@react-three/fiber";
 import { Environment, OrbitControls, ContactShadows } from "@react-three/drei"
-import { Model } from "../../../public/3_06AM"; 
 
 
 const Study = () => {
     const [userInfo, setUserInfo] = useState(null); 
     const [allNotes, setAllNotes] = useState([]);
     const [suggestedNotes, setSuggestedNotes] = useState([]); 
+    const [avgStartSleep, setAvgStartSleep] = useState(23);
+    const [avgEndSleep, setAvgEndSleep] = useState(9);
+    const [productivity, setProductivity] = useState(8);
     
     const [hoveredNoteId, setHoveredNoteId] = useState(null);
     const [isTimerRunning, setIsTimerRunning] = useState(false);
@@ -46,20 +57,50 @@ const Study = () => {
 
     const [studyStart, setStudyStart] = useState(null); 
     const [studyEnd, setStudyEnd] = useState(null); 
+    const [allFriends, setAllFriends] = useState([]);
+
+    //FOR STUDY ROOM CANVASES
+    const canvases = [
+      {id: 1, component: <Room1Model/>, position:[100, 0, 100]}, 
+      // {id: 2, component: <Model/>, position:[0, 0, 100]}, 
+      // {id: 3, component: <Model/>, position:[100, 0, 0]}, 
+      // {id: 4, component: <Model/>, position:[0, 0, 0]}, 
+      // {id: 5, component: <Model/>, position:[100, 100, 100]}
+    ]
+
+    const [currentIndex, setCurrentIndex] = useState(0); 
+    const goBack = () => {
+      setCurrentIndex((prev) => {
+        const newIndex = prev === 0 ? canvases.length - 1 : prev - 1;
+        console.log("goBack becomes " + newIndex);
+        return newIndex;
+      });
+    };
+
+    const goForward = () => {
+      setCurrentIndex((prev) => {
+        const newIndex = prev === canvases.length - 1 ? 0 : prev + 1;
+        console.log("goForward becomes " + newIndex);
+        return newIndex;
+      });
+    };
 
     useEffect(() => {
     const fetchData = async () => {
         await getUserInfo();
         await getAllNotes();
+        await getAllSleep(); 
+        await getAllMood(); 
+        await getAllFriends();
     };
     fetchData();
     }, []);
 
     useEffect(() => {
-        if (allNotes.length > 0) {
-            getSuggestions();
-        }
-    }, [allNotes]);
+      if (allNotes.length > 0) {
+        callGetSuggestions();
+      }
+    }, [allNotes]);  // Runs when `allNotes` changes
 
 
     const getUserInfo = async () => { 
@@ -141,6 +182,47 @@ const Study = () => {
         }
     };
 
+    const getAllSleep = async () => { 
+      try { 
+        const response = await axiosInstance.get("/get-all-sleep");
+        if (response.data && response.data.sleeps) { 
+          const sleepData = response.data.sleeps; 
+          if (sleepData.length > 0) {
+            const numRecords = sleepData.length > 0 ? sleepData.length : 1;
+            setAvgStartSleep(sleepData.reduce((total, record) => { 
+              const sleepStart = new Date(record.sleepStart).getHours();
+              return total + sleepStart; 
+            }, 0) / numRecords); 
+            setAvgEndSleep(sleepData.reduce((total, record) => { 
+              const sleepEnd = new Date(record.sleepEnd).getHours();
+              return total + sleepEnd; 
+            }, 0) / numRecords); 
+          } else {
+            setAvgStartSleep(23); // Default value if no records  
+            setAvgEndSleep(9); // Default value if no records
+          }
+        }
+      } catch (error) { 
+          console.log("beep boop error time", error); 
+      }
+    }
+
+    const getAllMood = async () => { 
+      try { 
+          const response = await axiosInstance.get("/get-all-mood");
+          if (response.data && response.data.moods) { 
+              const moodData = response.data.moods; 
+              setProductivity(moodData.reduce((total, record) => {
+                const moodEmoji = record.mood; 
+                const moodScore = EMOJIS[moodEmoji]?.score || 0; 
+                return total + moodScore
+              }, 0) / moodData.length);
+          }
+      } catch (error) { 
+          console.log("beep boop error time")
+      }
+    }
+
     //can use updateIsDone to format the whenDone of the Note 
     const updateIsDone = async (note) => {
         const noteId = note._id;
@@ -203,39 +285,30 @@ const Study = () => {
     };
 
     // TODO: Add session record to database 
-    const studyRoom = 1; 
+
     const addStudySession = async () => { 
         try { 
-            
-
             const studyEnd = Date.now(); 
-
-            console.log("HERE2");
-            console.log(typeof studyStart);
-            console.log(studyStart);
-            console.log(typeof studyEnd);
-            console.log(studyEnd);
-            console.log(typeof elapsedTime);
-            console.log(elapsedTime);
-            console.log(typeof completedTasks);
-            console.log(completedTasks);
-            console.log(typeof studyRoom);
-            
+            // console.log("studyStart: " + studyStart);
+            // console.log("studyEnd: " + studyEnd);
+            // console.log("elapsedTime: " + elapsedTime);
+            // console.log("completedTasks: " + completedTasks);
+            // console.log("currentIndex: " + currentIndex)
             const response = await axiosInstance.post("/add-study-session", { 
                 studyStart, 
                 studyEnd,
                 elapsedTime,
                 completedTasks,
-                studyRoom,
+                studyRoom: currentIndex, //index of the studyroom
             })
 
             if (response.data && response.data.studyLog) { 
                 //getAllJournal()
                 showToastMessage("Study Session Logged Succesfully", 'add')
-                onClose()
             } 
 
         } catch (error) { 
+          console.log(error);
             if (error.response && error.response.data && error.response.data.message) { 
                 setError(error.response.data.message)
             }
@@ -248,33 +321,149 @@ const Study = () => {
         addStudySession(); 
     }
 
-    //to load the your tasks section and use the SeeSuggestedTasks
-    const getSuggestions = async () => {
-        try {
-            const tasks = allNotes.filter(note => !note.isDone);
-            const response = await axiosInstance.post('/api/suggest-priority-notes', { tasks:  tasks });
-    
-            if (response.data.result) {
-                // set the full note objects for the suggested titles
-                setSuggestedNotes(response.data.result);
-                
-            }
-        } catch (error) {
-            console.error("Error getting suggestions:", error);
-        } 
+    const callGetSuggestions = () => { 
+      setSuggestedNotes(getSuggestions(allNotes.filter(note => !note.isDone), avgStartSleep, avgEndSleep, productivity));
+    }
+
+    const Dog = () => {
+      const dogRef = useRef();
+
+      return (
+        <group ref={dogRef} position={[1, 0.5, 2]} rotation={[0, 1, 0]}>
+          <DogModel scale={[7, 7, 7]} />
+        </group>
+      );
     };
+
+    const Bee = () => {
+      const beeRef = useRef();
+
+      return (
+        <group ref={beeRef} position={[3, 8, 0]} rotation={[0, -2.5, 0]}>
+          <BeeModel scale={[0.3, 0.3, 0.3]} />
+        </group>
+      );
+    };
+
+    const Axolotl = () => {
+      const axoRef = useRef();
+
+      return (
+        <group ref={axoRef} position={[0, 0, 0]} rotation={[0, -2.5, 0]}>
+          <AxolotlModel scale={[0.05, 0.05, 0.05]} />
+        </group>
+      );
+    };
+
+    const Camel = () => {
+      const camRef = useRef();
+
+      return (
+        <group ref={camRef} position={[7, 0, -2]} rotation={[0, -2.4, 0]}>
+          <CamelModel scale={[2, 2, 2]} />
+        </group>
+      );
+    };
+
+    const Centaur = () => {
+      const cenRef = useRef();
+
+      return (
+        <group ref={cenRef} position={[-4, 0, 6]} rotation={[0, -2.5, 0]}>
+          <CentaurModel scale={[2, 2, 2]} />
+        </group>
+      );
+    };
+
+    const Cow = () => {
+      const cowRef = useRef();
+
+      return (
+        <group ref={cowRef} position={[1, 0, 5]} rotation={[0, 1.5, 0]}>
+          <CowModel scale={[2, 2, 2]} />
+        </group>
+      );
+    };
+
+
+    const Goat = () => {
+      const goatRef = useRef();
+
+      return (
+        <group ref={goatRef} position={[0, 0, 0]} rotation={[0, -2.5, 0]}>
+          <GoatModel scale={[0.1, 0.1, 0.1]} />
+        </group>
+      );
+    };
+
+
+    const Monster = () => {
+      const beeRef = useRef();
+
+      return (
+        <group ref={beeRef} position={[0, 0.2, 0]} rotation={[0, -2.5, 0]}>
+          <MonsterModel scale={[2, 2, 2]} />
+        </group>
+      );
+    };
+
+
+    const Pigman = () => {
+      const beeRef = useRef();
+
+      return (
+        <group ref={beeRef} position={[-4, 7, 0]} rotation={[0, -2.5, 0]}>
+          <PigmanModel scale={[1, 1, 1]} />
+        </group>
+      );
+    };
+
+
+    const RainbowDragon = () => {
+      const beeRef = useRef();
+
+      return (
+        <group ref={beeRef} position={[0, 8, 0]} rotation={[0, -2.5, 0]}>
+          <RainbowDragonModel scale={[1, 1, 1]} />
+        </group>
+      );
+    };
+
+    const Shark = () => {
+      const beeRef = useRef();
+
+      return (
+        <group ref={beeRef} position={[-3, 0, 8]} rotation={[0, -2.5, 0]}>
+          <SharkModel scale={[0.3, 0.3, 0.3]} />
+        </group>
+      );
+    };
+
+    const getAllFriends = async () => { 
+        try { 
+            const response = await axiosInstance.get("/get-all-friends");
+            if (response.data && response.data.friends) { 
+                setAllFriends(response.data.friends);
+            }
+        } catch (error) { 
+            if (error.response.status == 401) { 
+                localStorage.clear(); 
+                navigate("/login");
+            }
+        }
+    }
 
     return (
   <>
     <Navbarv3 userInfo={userInfo} />
 
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-4">
       <div className="flex flex-row gap-4 w-full">
         
         {/* Left Column - Tasks (25%) */}
         <StudySuggested 
           nodeData={suggestedNotes}
-          getSuggestions={getSuggestions}
+          
         />
 
         {/* Middle Column - Timer */}
@@ -314,35 +503,50 @@ const Study = () => {
                 </>
               )}
         </div> 
-            
-       <div className="flex items-center justify-between h-120 w-full">
 
-        <Canvas camera={{ fov: 7, position: [100, 0, 100] }}>
-            <ambientLight intensity={5} />
+      <div className="flex items-center justify-center h-120 w-full">
+        {/* Canvas */}
+        <div className={`${isTimerRunning ? 'ml-21' : 'w-full h-full overflow-hidden rounded'}`}>
+
+          <Canvas camera={{ fov: 10, position: canvases[currentIndex].position }}>
+            <ambientLight intensity={0.5} />
             <OrbitControls
-            enableZoom={false}
-            minAzimuthAngle={-Math.PI / 2} // -90 degrees
-            maxAzimuthAngle={Math.PI / 2}  // +90 degrees
-            minPolarAngle={Math.PI / 2.5}  // optional: limit up/down tilt
-            maxPolarAngle={Math.PI / 2.5}  // optional: lock vertical angle
+              enableZoom={true}
+              minAzimuthAngle={-Math.PI}
+              // maxAzimuthAngle={Math.PI}
+              minPolarAngle={Math.PI / 2.5}
+              maxPolarAngle={Math.PI}
             />
-            <Model />
+            <Room1Model/>
+             {/* Dog model (to replace with friends avatars) */}
+            <Bee/> {/* Bee model*/}
+            <Camel/>
+            <Centaur/>
+            <Cow/>
+            <Monster/>
+            <Pigman/>
+            <RainbowDragon/>
+            <Shark/>
             <Environment preset="sunset" />
             <ContactShadows
-            opacity={0.5}
-            scale={100}
-            blur={1}
-            far={10}
-            resolution={256}
-            color="#000000"
+              opacity={0.5}
+              scale={100}
+              blur={1}
+              far={10}
+              resolution={256}
+              color="#000000"
             />
-        </Canvas>
+          </Canvas>
+      
+          {/* left arrow */}
+          
+          
         </div> 
-        </div>
-
+      </div>
+      </div> 
       </div>
     </div>
-
+    
     {/* Modal */}
     <Modal
       isOpen={openAddEditModal.isShown}
@@ -384,6 +588,7 @@ const Study = () => {
   </>
 );
 }
+
 
 export default Study; 
 
@@ -465,6 +670,25 @@ export default Study;
 
 //         <div> 
 //         Solo study 
+
+// {isTimerRunning ? null : <>
+//           <button 
+//             className={`absolute right-120 top-2/3 transform -translate-y-1/2 p-3 rounded-full shadow-lg transition-all 
+//               duration-200 bg-yellow-400 hover:bg-yellow-500 text-yellow-800 hover:scale-110`}
+//             onClick={()=>goBack()}
+//             disabled={isTimerRunning}> {/* button disabled (cannot change studyroom once timer starts)*/}
+//             <IoCaretBackOutline size={30}/>
+//           </button>
+          
+          
+//           <button 
+//             className={`absolute right-[60px] top-2/3 transform -translate-y-1/2 p-3 rounded-full shadow-lg transition-all 
+//               duration-200 bg-yellow-400 hover:bg-yellow-500 text-yellow-800 hover:scale-110`}
+//             onClick={()=>goForward()}
+//             disabled={isTimerRunning}> {/* button disabled (cannot change studyroom)*/}
+//             <IoCaretForwardOutline size={30} />
+//           </button>
+//           </>
 
 //             {/*let user see all tasks and can mark them as completed */}
 //             {allNotes.filter(note => !note.isDone).length > 0 ? (
@@ -566,4 +790,4 @@ export default Study;
 //             <p className="text-gray-500">No tasks completed yet</p>
 //         )}
 //     </div>
-// ) : nul
+// ) : null;

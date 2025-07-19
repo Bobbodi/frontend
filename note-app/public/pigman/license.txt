@@ -1,0 +1,11 @@
+Model Information:
+* title:	Minecraft - Pigman
+* source:	https://sketchfab.com/3d-models/minecraft-pigman-81e749a8ce5341a49dddbd16dd9da374
+* author:	omargabagu (https://sketchfab.com/omargabagu)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Minecraft - Pigman" (https://sketchfab.com/3d-models/minecraft-pigman-81e749a8ce5341a49dddbd16dd9da374) by omargabagu (https://sketchfab.com/omargabagu) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

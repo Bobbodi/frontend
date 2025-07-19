@@ -12,7 +12,7 @@ import Toast from "../../components/ToastMessage/Toast";
 
 import axiosInstance from "../../utils/axiosInstance";
 
-const SeeAllSuggested = ({ nodeData, type, getSuggestions, onClose }) => {
+const SeeAllSuggested = ({ nodeData, onClose }) => {
 
     if (!nodeData) return null; 
 
@@ -60,7 +60,6 @@ const SeeAllSuggested = ({ nodeData, type, getSuggestions, onClose }) => {
         if (response.data && response.data.error === false) { 
           console.log("here3")
           showToastMessage("Task Deleted Succesfully", 'delete')
-          getSuggestions()
           onClose()
         } 
 
@@ -105,7 +104,7 @@ const SeeAllSuggested = ({ nodeData, type, getSuggestions, onClose }) => {
     }
     
     const length = nodeData ? Object.keys(nodeData).length : 0;
-    console.log(nodeData); 
+    //console.log("SeeAllSuggested nodeData: ", nodeData);
     return (
     <>
     <div className="relative justify-center bg-white p-1 rounded-3xl border-2 border-gray-200 shadow-md w-full">

@@ -226,7 +226,7 @@ const Profile = () => {
                 <h3 className="text-xl font-semibold">Study</h3>
               </div>
               <p className="text-4xl font-bold text-gray-800 mb-2">{allStudyTime}</p>
-              <p className="text-gray-500">Hours since birth</p>
+              <p className="text-gray-500">Since birth</p>
             </div>
           
 

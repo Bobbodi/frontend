@@ -7,8 +7,8 @@ import Profile from './pages/Profile/Profile'
 import Avatar from './pages/Profile/avatar'
 import EditProfile from './pages/Profile/EditProfile'
 import Wellness from './pages/Wellness/Wellness'
-import Friends from './pages/Friends/Friends'
 import Study from './pages/Study/Study'
+import About from './pages/About/About'
 
 
 const App = () => {
@@ -25,6 +25,7 @@ const App = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/about" element={<About />} />
       </Routes>
     </Router>
   )

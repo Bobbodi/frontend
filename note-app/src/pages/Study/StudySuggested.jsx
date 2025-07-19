@@ -109,13 +109,13 @@ const StudySuggested = ({ nodeData, type, getSuggestions, onClose }) => {
     return (
     <>
     {/* relative justify-center p-1 rounded-3xl border-2 border-gray-200 */}
-    <div className="max-w-99">
+    <div className="max-w-99 ml-4 mt-4 mb-4 ">
       
       {/*show all notes schedule */}
       {length > 0 
       ? 
       (
-        <div className="flex flex-row w-full overflow-x-auto p-2 gap-2"
+        <div className="flex flex-row w-full overflow-x-auto gap-2"
         
             style={{ scrollbarWidth: 'thin'}}>
             {Object.entries(nodeData)

@@ -6,6 +6,7 @@ import axiosInstance from '../../utils/axiosInstance';
 import { EMOJIS } from '../../utils/constants.js';
 import SeeAllMoods from './SeeAllMoods.jsx';
 import Modal from "react-modal";
+import { getGreeting, yestMidnight, todayMorn, formatDatetimeLocal } from '../../utils/helper.js' 
 
 
 import { RiExpandDiagonalLine } from "react-icons/ri";
@@ -42,9 +43,9 @@ const Wellness = () => {
     const [allSleepLength, setAllSleepLength] = useState(null); 
     const [weekSleep, setWeekSleep] = useState([]); 
     const [weekSleepLength, setWeekSleepLength] = useState(null); 
-    const [sleepStart, setSleepStart] = useState("22:30"); // Default bedtime
-    const [sleepEnd, setSleepEnd] = useState("06:15"); // Default wake-up time
-    const [dreams, setDreams] = useState(""); // Optional: Add dreams input
+    const [sleepStart, setSleepStart] = useState(yestMidnight()); // Default bedtime
+    const [sleepEnd, setSleepEnd] = useState(todayMorn()); // Default wake-up time
+    const [dreams, setDreams] = useState(""); 
     const [weekTimeData, setWeekTimeData] = useState([]);
 
     const [isSearch, setIsSearch] = useState(false);
@@ -66,10 +67,10 @@ const Wellness = () => {
         await getUserInfo();
         await getAllJournal();
         await getAllMood();
-        await setUpSleep(); // Run sequentially
-        if (allSleep.length > 0) { 
-          calcStats(); 
-        }
+        // await setUpSleep(); // Run sequentially
+        // if (allSleep.length > 0) { 
+        //   calcStats(); 
+        // }
       };
       init();
     }, []); // Keep empty if no external deps
@@ -222,106 +223,6 @@ const Wellness = () => {
       return orderedMoods;
     }
 
-    // Helper function (should be defined elsewhere in your component)
-    const timeToMinutes = (timeStr) => {
-      const [hours, minutes] = timeStr.split(':').map(Number);
-      return hours * 60 + minutes;
-    };
-
-    const calcStats = () => {
-      if (!weekSleep || weekSleep.length === 0) {
-        setAverageHours(0);
-        setConsistency(0);
-        return;
-      } 
-
-      // 1. Calculate average sleep hours
-      const totalHours = weekSleep.reduce((sum, sleep) => {
-        const start = timeToMinutes(sleep.sleepStart);
-        const end = timeToMinutes(sleep.sleepEnd);
-        let duration = end - start;
-        
-        // Handle overnight sleeps (end time is next day)
-        if (duration < 0) duration += 24 * 60;
-        
-        return sum + (duration / 60); // Convert minutes to hours
-      }, 0);
-
-      const avgHours = totalHours / weekSleep.length;
-      setAverageHours(parseFloat(avgHours.toFixed(1))); // Round to 1 decimal
-
-      // 2. Calculate consistency (standard deviation of sleep times)
-      const startTimes = weekSleep.map(s => timeToMinutes(s.sleepStart));
-      const endTimes = weekSleep.map(s => timeToMinutes(s.sleepEnd));
-      
-      // Convert all times to "minutes since midnight" (0-1440)
-      const normalizedTimes = [...startTimes, ...endTimes].map(t => t % (24 * 60));
-      
-      const mean = normalizedTimes.reduce((a, b) => a + b, 0) / normalizedTimes.length;
-      const squaredDiffs = normalizedTimes.map(t => Math.pow(t - mean, 2));
-      const variance = squaredDiffs.reduce((a, b) => a + b, 0) / normalizedTimes.length;
-      const stdDev = Math.sqrt(variance);
-      
-      // Convert standard deviation to consistency score (0-100)
-      // Lower stdDev = more consistent (higher score)
-      const maxPossibleDev = 720; // 12 hours from mean (worst case)
-      const consistencyScore = Math.max(0, 100 - (stdDev / maxPossibleDev * 100));
-        (Math.round(consistencyScore));
-    };
-
-    const setUpSleep = async () => {
-      
-      try { 
-        const response = await axiosInstance.get("/get-all-sleep");
-        if (response.data && response.data.sleeps) { 
-          setAllSleep(response.data.sleeps);
-          setAllSleepLength(response.data.sleeps.length);
-        }
-
-        const weekResponse = await axiosInstance.get("/get-this-week-sleep");
-        if (weekResponse.data && weekResponse.data.sleeps) { 
-          const sleeps = weekResponse.data.sleeps;
-          setWeekSleep(sleeps);
-          setWeekSleepLength(sleeps.length);
-
-          //set up stats 
-        const totalHours = sleeps.reduce((sum, sleep) => {
-          const start = timeToMinutes(sleep.sleepStart);
-          const end = timeToMinutes(sleep.sleepEnd);
-          let duration = end - start;
-          
-          // Handle overnight sleeps (end time is next day)
-          if (duration < 0) duration += 24 * 60;
-          
-          return sum + (duration / 60); // Convert minutes to hours
-        }, 0);
-
-        const avgHours = totalHours / sleeps.length;
-        setAverageHours(parseFloat(avgHours.toFixed(1))); // Round to 1 decimal
-
-        // 2. Calculate consistency (standard deviation of sleep times)
-        const startTimes = sleeps.map(s => timeToMinutes(s.sleepStart));
-        const endTimes = sleeps.map(s => timeToMinutes(s.sleepEnd));
-        
-        // Convert all times to "minutes since midnight" (0-1440)
-        const normalizedTimes = [...startTimes, ...endTimes].map(t => t % (24 * 60));
-        
-        const mean = normalizedTimes.reduce((a, b) => a + b, 0) / normalizedTimes.length;
-        const squaredDiffs = normalizedTimes.map(t => Math.pow(t - mean, 2));
-        const variance = squaredDiffs.reduce((a, b) => a + b, 0) / normalizedTimes.length;
-        const stdDev = Math.sqrt(variance);
-        
-        // Convert standard deviation to consistency score (0-100)
-        // Lower stdDev = more consistent (higher score)
-        const maxPossibleDev = 720; // 12 hours from mean (worst case)
-        const consistencyScore = Math.max(0, 100 - (stdDev / maxPossibleDev * 100));
-        setConsistency(Math.round(consistencyScore));
-        }
-      } catch (error) { 
-          console.log("beep boop error time")
-      }
-    }
-
     const addNewSleep = async () => {
       
       try { 
@@ -330,7 +231,7 @@ const Wellness = () => {
         })
 
         if (response.data && response.data.sleepLog) { 
-          setUpSleep()
+          //setUpSleep()
           showToastMessage("Sleep Added Succesfully", 'add')
         } 
 
@@ -345,10 +246,10 @@ const Wellness = () => {
     
 
 return (
-  <div className="min-h-screen bg-gray-50">
+  <div className=" bg-gray-50">
     <Navbarv3 userInfo={userInfo} />
     
-    <div className="container mx-auto px-3 py-1">
+    <div className="mt-2 container mx-auto px-3 py-1">
       {/*The three sections: MOOD, SLEEP, JOURNALING */}
       <div className="flex flex-col lg:flex-row gap-3">
 
@@ -360,14 +261,17 @@ return (
         <div className="mb-6">
           <h2 className="text-sm font-medium text-gray-500 mb-3">How are you feeling today?</h2>
           <div className="flex justify-between grid grid-cols-5 gap-5">
-            {Object.entries(EMOJIS).map(([emoji, desc]) => (
-              <div key={desc} className="relative inline-block group"> {/* Container with group class */}
+            {Object.entries(EMOJIS).map((emoji) => (
+              
+              <div key={emoji[1].name} className="relative inline-block group"> {/* Container with group class */}
+           
                 <button 
                   className="text-3xl hover:scale-110 hover:bg-gray-100 hover:rounded-full transition-transform"
-                  onClick={() => handleAddMood(emoji)}
-                  aria-label={desc}
+                  onClick={() => handleAddMood(emoji[0])}
+                  aria-label={emoji[1].name}
                 >
-                  {emoji}
+                  {emoji[0]}
+                  
                 </button>
                 
                 {/* Tooltip */}
@@ -377,7 +281,7 @@ return (
                   opacity-0 group-hover:opacity-100 transition-opacity
                   whitespace-nowrap pointer-events-none
                 ">
-                  {desc}
+                  {emoji[1].name}
                   {/* Tooltip arrow */}
                   <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-0 border-t-4 border-l-transparent border-r-transparent border-t-purple-500"></div>
                 </div>
@@ -440,38 +344,36 @@ return (
       </div>
       </div> 
 
-      {/* SLEEP SECTION */}
+      {/* ---------------------SLEEP SECTION START -------------------------*/}
       <div className="lg:w-1/3 w-full bg-white rounded-xl shadow-lg p-5">
         <h1 className="text-2xl font-bold text-gray-800 mb-3">Sleep</h1>
-        <h2 className="text-sm font-medium text-gray-500 mb-2">Last night </h2>
+        {/* <h2 className="text-sm font-medium text-gray-500 mb-2">Last night </h2> */}
         {/* Sleep Time Input */}
         <div className="bg-blue-50 rounded-xl p-3">
-        <div className="grid grid-cols-2 gap-4 mb-2">
           <div>
-            <label className="text-sm font-medium text-gray-500 block mb-1">Bedtime</label>
+            <div className="grid grid-cols-1 gap-2">
+            <label className="text-sm font-medium text-gray-500 block mb-1 ml-1">Bedtime</label>
             <input
-              type="time"
+              type="datetime-local"
               className="w-full p-2 border border-gray-200 rounded-lg"
+              value={formatDatetimeLocal(sleepStart)}
               onChange={(e) => setSleepStart(e.target.value)}
-              step="900" 
             />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-gray-500 block mb-1">Wake up</label>
+            <label className="text-sm font-medium text-gray-500 block mb-1 ml-1">Wakeup</label>
             <input
-              type="time"
+              type="datetime-local"
               className="w-full p-2 border border-gray-200 rounded-lg"
+              value={formatDatetimeLocal(sleepEnd)}
               onChange={(e) => setSleepEnd(e.target.value)}
-              step="900" 
             />
           </div>
-        </div>
+          </div> 
 
-        <div className="relative">
+        <div className="relative mt-2">
         {/* Dreams with tick */}
         <div className="flex flex-col gap-1 relative">
           <textarea
-            className="w-full text-sm p-3 pr-10 border border-gray-200 rounded-lg min-h-[80px]"
+            className="w-full font-medium text-sm p-3 pr-10 border border-gray-200 rounded-lg min-h-[80px]"
             placeholder="Any dreams?"
             value={dreams}
             onChange={(e) => setDreams(e.target.value)}
@@ -497,10 +399,10 @@ return (
       </div> 
        
 
-        {/* Sleep Trends */}
+        {/* Sleep Trends ---------------------------------------------------------*/}
         <div className="mb-6">
           <div className="flex items-center justify-between mt-3 mb-3">
-            <h2 className="text-sm font-medium text-gray-500">This week's sleep</h2>
+            <h2 className="text-sm font-medium text-gray-500">{getGreeting() + ' ' + userInfo?.fullName}</h2>
             {/* Open modal to see all sleep logs */}
             <button className=""
               onClick={() => {
@@ -517,7 +419,7 @@ return (
               </h1>
             </button> 
           </div> 
-          <div className="flex items-center space-x-4">
+          {/* <div className="flex items-center space-x-4">
             <div className="flex-1 bg-blue-50 rounded-lg p-3">
               <div className="text-2xl font-bold text-blue-600">{averageHours}</div>
               <div className="text-xs text-gray-500">hours</div>
@@ -526,11 +428,12 @@ return (
               <div className="text-2xl font-bold text-blue-600">{consistency}%</div>
               <div className="text-xs text-gray-500">consistency</div>
             </div>
-          </div>
+          </div> */}
         </div>
 
-</div> 
+    </div> 
 
+      {/* ---------------------SLEEP SECTION END -------------------------*/}
 
       {/* journaling section */}
       <div className="lg:w-1/3 w-full bg-white rounded-xl shadow-lg p-5">
@@ -678,7 +581,7 @@ return (
     >
         <SeeAllSleep
             type={openAllSleepModal.type}
-            sleeps={openAllSleepModal.data}
+            sleepData={openAllSleepModal.data}
             onClose={() => { 
                 setOpenAllSleepModal({ isShown:false, type:"see", data:null});
             }}
@@ -725,3 +628,98 @@ export default Wellness
             <MdCheck className="text-xl" />
           </button>
         </div> */}
+
+        
+    // const calcStats = () => {
+    //   if (!weekSleep || weekSleep.length === 0) {
+    //     setAverageHours(0);
+    //     setConsistency(0);
+    //     return;
+    //   } 
+
+    //   // 1. Calculate average sleep hours
+    //   const totalHours = weekSleep.reduce((sum, sleep) => {
+    //     const start = timeToMinutes(sleep.sleepStart);
+    //     const end = timeToMinutes(sleep.sleepEnd);
+    //     let duration = end - start;
+        
+    //     // Handle overnight sleeps (end time is next day)
+    //     if (duration < 0) duration += 24 * 60;
+        
+    //     return sum + (duration / 60); // Convert minutes to hours
+    //   }, 0);
+
+    //   const avgHours = totalHours / weekSleep.length;
+    //   setAverageHours(parseFloat(avgHours.toFixed(1))); // Round to 1 decimal
+
+    //   // 2. Calculate consistency (standard deviation of sleep times)
+    //   const startTimes = weekSleep.map(s => timeToMinutes(s.sleepStart));
+    //   const endTimes = weekSleep.map(s => timeToMinutes(s.sleepEnd));
+      
+    //   // Convert all times to "minutes since midnight" (0-1440)
+    //   const normalizedTimes = [...startTimes, ...endTimes].map(t => t % (24 * 60));
+      
+    //   const mean = normalizedTimes.reduce((a, b) => a + b, 0) / normalizedTimes.length;
+    //   const squaredDiffs = normalizedTimes.map(t => Math.pow(t - mean, 2));
+    //   const variance = squaredDiffs.reduce((a, b) => a + b, 0) / normalizedTimes.length;
+    //   const stdDev = Math.sqrt(variance);
+      
+    //   // Convert standard deviation to consistency score (0-100)
+    //   // Lower stdDev = more consistent (higher score)
+    //   const maxPossibleDev = 720; // 12 hours from mean (worst case)
+    //   const consistencyScore = Math.max(0, 100 - (stdDev / maxPossibleDev * 100));
+    //     (Math.round(consistencyScore));
+    // };
+
+    // const setUpSleep = async () => {
+      
+    //   try { 
+    //     const response = await axiosInstance.get("/get-all-sleep");
+    //     if (response.data && response.data.sleeps) { 
+    //       setAllSleep(response.data.sleeps);
+    //       setAllSleepLength(response.data.sleeps.length);
+    //     }
+
+    //     const weekResponse = await axiosInstance.get("/get-this-week-sleep");
+    //     if (weekResponse.data && weekResponse.data.sleeps) { 
+    //       const sleeps = weekResponse.data.sleeps;
+    //       setWeekSleep(sleeps);
+    //       setWeekSleepLength(sleeps.length);
+
+    //       //set up stats 
+    //       const totalHours = sleeps.reduce((sum, sleep) => {
+    //       const start = timeToMinutes(sleep.sleepStart);
+    //       const end = timeToMinutes(sleep.sleepEnd);
+    //       let duration = end - start;
+          
+    //       // Handle overnight sleeps (end time is next day)
+    //       if (duration < 0) duration += 24 * 60;
+          
+    //       return sum + (duration / 60); // Convert minutes to hours
+    //     }, 0);
+
+    //     const avgHours = totalHours / sleeps.length;
+    //     setAverageHours(parseFloat(avgHours.toFixed(1))); // Round to 1 decimal
+
+    //     // 2. Calculate consistency (standard deviation of sleep times)
+    //     const startTimes = sleeps.map(s => timeToMinutes(s.sleepStart));
+    //     const endTimes = sleeps.map(s => timeToMinutes(s.sleepEnd));
+        
+    //     // Convert all times to "minutes since midnight" (0-1440)
+    //     const normalizedTimes = [...startTimes, ...endTimes].map(t => t % (24 * 60));
+        
+    //     const mean = normalizedTimes.reduce((a, b) => a + b, 0) / normalizedTimes.length;
+    //     const squaredDiffs = normalizedTimes.map(t => Math.pow(t - mean, 2));
+    //     const variance = squaredDiffs.reduce((a, b) => a + b, 0) / normalizedTimes.length;
+    //     const stdDev = Math.sqrt(variance);
+        
+    //     // Convert standard deviation to consistency score (0-100)
+    //     // Lower stdDev = more consistent (higher score)
+    //     const maxPossibleDev = 720; // 12 hours from mean (worst case)
+    //     const consistencyScore = Math.max(0, 100 - (stdDev / maxPossibleDev * 100));
+    //     setConsistency(Math.round(consistencyScore));
+    //     }
+    //   } catch (error) { 
+    //       console.log("beep boop error time")
+    //   }
+    // }

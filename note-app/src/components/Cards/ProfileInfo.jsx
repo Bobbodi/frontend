@@ -5,6 +5,7 @@ import { FaBookOpenReader } from "react-icons/fa6";
 import { BiBookHeart } from "react-icons/bi";
 import { PiStudentBold } from "react-icons/pi";
 import { BsFillJournalBookmarkFill } from "react-icons/bs";
+import { BiHelpCircle } from "react-icons/bi";
 
 const ProfileInfo = ({ userInfo, onLogout, onProfile, onWellness, onStudy, onTasks, isWellness, isTasks, isStudy }) => {
   
@@ -57,6 +58,7 @@ const ProfileInfo = ({ userInfo, onLogout, onProfile, onWellness, onStudy, onTas
   return (
     <div className="flex items-center gap-6">
       <div className="flex items-center gap-3">
+
         <TabItem 
           icon={FaTasks} 
           label="Tasks" 

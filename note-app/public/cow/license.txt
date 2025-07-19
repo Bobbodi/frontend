@@ -1,0 +1,11 @@
+Model Information:
+* title:	Minecraft Cow
+* source:	https://sketchfab.com/3d-models/minecraft-cow-f09ab0765f014c1498d298faaca142c0
+* author:	utru (https://sketchfab.com/utru)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Minecraft Cow" (https://sketchfab.com/3d-models/minecraft-cow-f09ab0765f014c1498d298faaca142c0) by utru (https://sketchfab.com/utru) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

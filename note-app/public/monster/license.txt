@@ -1,0 +1,11 @@
+Model Information:
+* title:	Minecraft Monster
+* source:	https://sketchfab.com/3d-models/minecraft-monster-39710ebb643f455983226f82680a7a5e
+* author:	Frog (https://sketchfab.com/RecodorYT)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Minecraft Monster" (https://sketchfab.com/3d-models/minecraft-monster-39710ebb643f455983226f82680a7a5e) by Frog (https://sketchfab.com/RecodorYT) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

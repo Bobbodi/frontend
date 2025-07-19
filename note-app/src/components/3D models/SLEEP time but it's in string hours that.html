@@ -1,0 +1,20 @@
+SLEEP time but it's in string hours that I don't want 
+
+<div>
+  <label className="text-sm font-medium text-gray-500 block mb-1">Bedtime</label>
+  <input
+    type="time"
+    className="w-full p-2 border border-gray-200 rounded-lg"
+    onChange={(e) => setSleepStart(e.target.value)}
+    step="900" 
+  />
+</div>
+<div>
+  <label className="text-sm font-medium text-gray-500 block mb-1">Wake up</label>
+  <input
+    type="time"
+    className="w-full p-2 border border-gray-200 rounded-lg"
+    onChange={(e) => setSleepEnd(e.target.value)}
+    step="900" 
+  />
+</div>
