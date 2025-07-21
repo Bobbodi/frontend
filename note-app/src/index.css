@@ -1,13 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap');
-@import "tailwindcss";
 
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
-@theme { 
+:root {
   --color-red: oklch(64.76% 0.204 11.07);
   --color-yellow: oklch(88.03% 0.135 86.06);
   --color-green: oklch(77.75% 0.160 166.57);
@@ -31,7 +29,9 @@
 
 @layer components { 
   .input-box { 
-    @apply w-full bg-transparent border-[1.5px] px-5 py-3 rounded mb-4 outline-none border-red;
+    @apply w-full bg-transparent border-[1.5px] px-5 py-3 rounded mb-4 outline-none border-customred;
+    /* If you want to use the CSS variable instead, comment out the line above and use the line below: */
+    /* border: 1.5px solid var(--color-red); */
   }
   .input-box:focus { 
     @apply border-yellow transition-all duration-200;
