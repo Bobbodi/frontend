@@ -40,7 +40,7 @@
     @apply w-full bg-red text-white p-2 rounded my-1 hover:bg-yellow transition-all duration-200;
   }
   .btn-secondary {
-    @apply w-full flex justify-center items-center text-sm bg-red text-white p-2 font-medium mt-5 p-3 text-center rounded-xl my-1 hover:bg-green transition-all duration-200 mx-auto;
+    @apply w-full flex justify-center items-center bg-red text-white p-2 font-medium mt-5 p-3 text-center rounded-xl my-1 hover:bg-green transition-all duration-200 mx-auto;
   }
   .icon-btn { 
     @apply text-xl cursor-pointer hover:text-yellow transition-all duration-200;
