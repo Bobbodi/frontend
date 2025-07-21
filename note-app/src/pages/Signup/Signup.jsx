@@ -1,9 +1,19 @@
 import React from "react";
 import Navbarv2 from "../../components/Navbarv2";
 import PasswordInput from "../../components/Input/PasswordInput";
+import { useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { validateEmail } from "../../utils/helper";
 import axiosInstance from "../../utils/axiosInstance";
+
+import { Room6Model } from '../../components/3D models/Room6Model.jsx';
+import { Room1Model } from '../../components/3D models/Room1Model.jsx';
+import { Room2Model } from '../../components/3D models/Room2Model.jsx';
+import { Room7Model } from '../../components/3D models/Room7Model.jsx';
+
+
+import { Canvas } from "@react-three/fiber";
+import { Environment, OrbitControls, ContactShadows } from "@react-three/drei"
 
 const Signup = () => {
     const [name, setName] = React.useState("")
@@ -56,35 +66,141 @@ const Signup = () => {
         }
     }
 
+    
+        const ROOM_MODELS = { 
+            1: {
+                    "model": Room1Model, 
+                    "position": [0, -0.8, 0], 
+                    "rotation": [0, -1.5, 0], 
+                    "scale": [0.23, 0.23, 0.23]
+                  },
+            2: { 
+                    "model": Room2Model, 
+                    "position": [0, -0.9, 0], 
+                    "rotation": [0, -3, 0], 
+                    "scale": [0.026, 0.026, 0.026]
+                  },
+            6: { 
+                    "model": Room6Model, 
+                    "position": [0, -0.8, 0], 
+                    "rotation": [0, -3.2, 0], 
+                    "scale": [0.0015, 0.0015, 0.0015]
+                  },
+            7: { 
+              "model": Room7Model, 
+              "position": [0, -0.8, 0], 
+              "rotation": [0, -3.2, 0], 
+              "scale": [0.055, 0.055, 0.055]
+            },
+            }
+        
+        const UserRoom = ({ roomId }) => { 
+                const roomRef = useRef(); 
+                const room = ROOM_MODELS[roomId];
+                const RoomModel = room.model || ROOM_MODELS[1].model; //fallback to default if not specified
+                {console.log(room.position, roomId)}
+                return ( 
+                <group ref = {roomRef} position = {room.position} rotation = {room.rotation}> 
+                    <RoomModel scale={room.scale}/>
+                </group>
+                )
+            }
+
     return (
         <>
         <Navbarv2 />
 
-        <div className="flex flex-col md:flex-row min-h-screen">
-      {/* Left Side - About Section (50% width) */}
-      <div className="w-full md:w-1/2 bg-white flex items-center justify-center p-10">
-        <div className="max-w-md">
-          <h1 className="text-4xl font-bold mb-6 text-yellow">Welcome to SlayFocus</h1>
-          <p className="text-xl mb-6">
-            A fun website to make studying fun
-          </p>
-          <ul className="space-y-3">
-            <li className="flex items-center">
-              <span className="mr-2">✓</span> Study planning
-            </li>
-            <li className="flex items-center">
-              <span className="mr-2">✓</span> Study rooms
-            </li>
-            <li className="flex items-center">
-              <span className="mr-2">✓</span> Wellness tools
-            </li>
-          </ul>
-        </div>
-      </div>
+        <div className="flex flex-col md:flex-row h-[calc(100vh-83px)] bg-yellow-50">
+              {/* Left Side - About Section (50% width) */}
+        
+              <div className="w-5/8 flex items-center justify-center">
+    <div className="w-full h-full grid grid-cols-2">
+      <Canvas camera={{ fov: 10, position: [-10, 2, 10]}}>
+        <ambientLight intensity={1} />
+        <OrbitControls
+          enableZoom={true}
+          minAzimuthAngle={-Math.PI/4}
+          maxAzimuthAngle={Math.PI/4}
+          minPolarAngle={Math.PI/6}
+          maxPolarAngle={Math.PI/2}
+        />
+        
+        {/* Create a 2x2 grid layout */}
+        
+            <group key={1}>
+              <UserRoom roomId={1} />
+            </group>
+
+        
+        <Environment preset="apartment" />
+        
+      </Canvas>
+
+      <Canvas camera={{ fov: 10, position: [-10, 2, 10]}}>
+        <ambientLight intensity={0} />
+        <OrbitControls
+          enableZoom={true}
+          minAzimuthAngle={-Math.PI/4}
+          maxAzimuthAngle={Math.PI/4}
+          minPolarAngle={Math.PI/6}
+          maxPolarAngle={Math.PI/2}
+        />
+        
+
+            <group key={2}>
+              <UserRoom roomId={2} />
+            </group>
+
+        
+        <Environment preset="apartment" />
+        
+      </Canvas>
+
+      <Canvas camera={{ fov: 10, position: [-10, 2, 10]}}>
+        <ambientLight intensity={0} />
+        <OrbitControls
+          enableZoom={true}
+          minAzimuthAngle={-Math.PI/4}
+          maxAzimuthAngle={Math.PI/4}
+          minPolarAngle={Math.PI/6}
+          maxPolarAngle={Math.PI/2}
+        />
+      
+            <group key={6}>
+              <UserRoom roomId={Number(6)} />
+            </group>
+
+        
+        <Environment preset="apartment" />
+        
+      </Canvas>
+
+      <Canvas camera={{ fov: 10, position:[-10, 2, 10]}}>
+        <ambientLight intensity={0} />
+        <OrbitControls
+          enableZoom={true}
+          minAzimuthAngle={-Math.PI/4}
+          maxAzimuthAngle={Math.PI/4}
+          minPolarAngle={Math.PI/6}
+          maxPolarAngle={Math.PI/2}
+        />
+        
+        {/* Create a 2x2 grid layout */}
+      
+            <group key={7}>
+              <UserRoom roomId={Number(7)} />
+            </group>
+
+        
+        <Environment preset="apartment" />
+        
+      </Canvas>
+    </div>
+  </div>
 
       {/* Right Side - Signup Form */}
-    <div className="w-full md:w-1/2 bg-gray-50 flex items-center justify-center p-6">
-        <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+    <div className="w-3/8 flex items-center justify-center p-6">
+        <div className="bg-white/60 backdrop-blur-sm rounded-xl shadow-lg p-8 w-full max-w-md">
           <form onSubmit={handleSignUp}>
             <h4 className="text-2xl font-bold mb-6 text-gray-800">Create Account</h4>
 

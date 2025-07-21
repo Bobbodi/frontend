@@ -5,7 +5,7 @@ import Login from './pages/Login/Login'
 import Signup from './pages/Signup/Signup'
 import Profile from './pages/Profile/Profile'
 import Avatar from './pages/Profile/avatar'
-import EditProfile from './pages/Profile/EditProfile'
+import StudyRoom from './pages/Profile/StudyRoom'
 import Wellness from './pages/Wellness/Wellness'
 import Study from './pages/Study/Study'
 import About from './pages/About/About'
@@ -20,7 +20,7 @@ const App = () => {
         
         <Route path="/study" element={<Study />} />
         <Route path="/profile/avatar" element={<Avatar />} />
-        <Route path="/profile/editprofile" element={<EditProfile />} />
+        <Route path="/profile/studyroom" element={<StudyRoom />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<Login />} />

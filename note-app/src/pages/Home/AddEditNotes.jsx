@@ -10,7 +10,7 @@ import axiosInstance from '../../utils/axiosInstance'
 
 
 
-const AddEditNotes = ({ nodeData, type, getAllNotes, onClose, showToastMessage }) => {
+const AddEditNotes = ({ nodeData, type, callGetSuggestions, onClose, showToastMessage }) => {
 
     const nodeData2 = nodeData || {}
 
@@ -47,7 +47,7 @@ const AddEditNotes = ({ nodeData, type, getAllNotes, onClose, showToastMessage }
 
         if (response.data && response.data.note) { 
           showToastMessage("Note Added Succesfully")
-          getAllNotes()
+          callGetSuggestions()
           onClose()
         } 
 
@@ -70,7 +70,7 @@ const AddEditNotes = ({ nodeData, type, getAllNotes, onClose, showToastMessage }
         if (response.data && response.data.note) { 
           console.log("here3")
           showToastMessage("Note Edited Succesfully")
-          getAllNotes()
+          callGetSuggestions()
           onClose()
         } 
 

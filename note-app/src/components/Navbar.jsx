@@ -71,7 +71,7 @@ const Navbar = ({userInfo, onSearchNote, handleClearSearch}) => {
     </div>
 
     {/* Search bar - takes available space on medium+ screens */}
-    {/* <div className="w-full md:w-auto md:flex-1 flex items-center justify-center md:px-4 mb-3 md:mb-0">
+    <div className="w-full md:w-auto md:flex-1 flex items-center justify-center md:px-4 mb-3 md:mb-0">
       <SearchBar
         value={searchQuery}
         onChange={({ target }) => setSearchQuery(target.value)}
@@ -80,7 +80,7 @@ const Navbar = ({userInfo, onSearchNote, handleClearSearch}) => {
         onKeyDown={onKeyDown}
         text="Search Tasks"
       />
-    </div> */}
+    </div>
 
     {/* Profile section - right-aligned */}
     <div className="flex-shrink-0 mr-5">
@@ -96,6 +96,7 @@ const Navbar = ({userInfo, onSearchNote, handleClearSearch}) => {
         isWellness={location.pathname === "/wellness"}
         isStudy={location.pathname === "/study"}
         isTasks={location.pathname === "/dashboard"}
+        isProfile={location.pathname === "/profile" || location.pathname === "/profile/studyroom" || location.pathname === "/profile/avatar"}
       />
     </div>
   </div>

@@ -1,0 +1,11 @@
+Model Information:
+* title:	Its Iso Rooms All The Way Down
+* source:	https://sketchfab.com/3d-models/its-iso-rooms-all-the-way-down-7a3533ba932e43e0bef16cf94bb0ff61
+* author:	hayjaja (https://sketchfab.com/hayjaja)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Its Iso Rooms All The Way Down" (https://sketchfab.com/3d-models/its-iso-rooms-all-the-way-down-7a3533ba932e43e0bef16cf94bb0ff61) by hayjaja (https://sketchfab.com/hayjaja) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

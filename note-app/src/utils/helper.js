@@ -1,3 +1,4 @@
+//FOR NAVBAR PROFILE
 export const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
@@ -43,14 +44,26 @@ export const todayMorn = () => {
     return tdy; 
 }
 export const getGreeting = () => { 
-    const currentHour = new Date().getHours(); 
-    if (currentHour >= 5 && currentHour < 12) { 
-        return "Good morning";
-    } else if (currentHour >= 12 && currentHour < 18) {
-        return "Good afternoon";
-    } else { 
-        return "Good night";
-    }
+    const rand = Math.random(); 
+    return rand < 0.1 
+    ? "Hi Honey "
+    : rand < 0.2
+    ? "Hi Gorgeous "
+    : rand < 0.3
+    ? "Hi Sissy "
+    : rand < 0.4 
+    ? "Hi Smurf "
+    : rand < 0.5 
+    ? "Hi Startight "
+    : rand < 0.6
+    ? "Missy Sissy "
+    : rand < 0.7 
+    ? "Hey Darling "
+    : rand < 0.8 
+    ? "Hi Pet "
+    : rand < 0.9 
+    ? "Hi Sweetie "
+    : "Hey Pookie ";
 }
 
 export const getInitials = (name) => {

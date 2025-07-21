@@ -49,6 +49,8 @@ const Home = () => {
     const [avgEndSleep, setAvgEndSleep] = useState(9);
     const [productivity, setProductivity] = useState(8);
 
+    const [searchNotes, setSearchNotes] = useState([]);
+
     //for calendar
     const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -132,18 +134,19 @@ const Home = () => {
     const onSearchNote = async (query) => { 
         if (!query || query.trim() === "") {
             setIsSearch(false);
-            getAllNotes();
+            callGetSuggestions();
             return;
         }
         try { 
             const response = await axiosInstance.get('/search-notes', {
                 params: { query },
             })
-
+            console.log(response);
             if (response.data && response.data.notes) { 
                 setIsSearch(true); 
-                setAllNotes(response.data.notes);
+                setSearchNotes(response.data.notes);
             }
+            console.log(suggestedNotes);
         } catch (error) { 
             console.log(error);
         }
@@ -265,9 +268,15 @@ const Home = () => {
             <div className="max-h-100 w-full lg:w-[40%] rounded-xl shadow-lg p-6">
             {/* Tasks Section Header */}
             <div className="flex flex-row justify-between items-center mb-3">
-                <p className="text-2xl font-bold text-gray-800">
-                {getRelativeDate(selectedDate)}
-                </p>
+                {
+                    isSearch && searchNotes ? (
+                        <p className="text-2xl font-bold text-blue-500">Search Results</p>
+                    ) : (
+                        <p className="text-2xl font-bold text-gray-800">
+                            {getRelativeDate(selectedDate)}
+                        </p>
+                    )
+                }
                 {/* See all Button - now properly contained */}
                 <div className="relative">
                 <button
@@ -289,36 +298,38 @@ const Home = () => {
             {/* Combined notes container with proper scrolling */}
             <div className="mt-3 space-y-3 overflow-y-auto max-h-[calc(100vh-300px)]" style={{ scrollbarWidth: 'thin' }}>
                 {/* Completed notes for selected day */}
-                {selectedDate && allDoneNotes
-                .filter((task) => {
-                    const noteDate = new Date(task.whenDone).toDateString();
-                    const selectedDateStr = new Date(selectedDate).toDateString();
-                    return noteDate === selectedDateStr;
-                })
-                .map((task) => (
-                    <div key={task._id} className="h-full">
-                    <NoteCard 
-                        title={task.title}
-                        date={task.createdOn}
-                        content={task.content}
-                        priority={task.priority}
-                        dueDate={task.dueDate}
-                        tags={task.tags}
-                        isDone={task.isDone}
-                        isEvent={task.isEvent}
-                        onEdit={() => handleEdit(task)}
-                        onDelete={() => deleteNote(task)}
-                        onDoneNote={() => updateIsDone(task)}
-                        hovered={hoveredNoteId === task._id}
-                        onMouseEnter={() => setHoveredNoteId(task._id)}
-                        onMouseLeave={() => setHoveredNoteId(null)}
-                    />
-                    </div>
-                ))
-                }
-
+                {isSearch && (
+                searchNotes.length > 0 ? (
+                    <>
+                    
+                    {searchNotes.map((task) => (
+                        <div key={task._id} className="h-full">
+                        <NoteCard 
+                            title={task.title}
+                            date={task.createdOn}
+                            content={task.content}
+                            priority={task.priority}
+                            dueDate={task.dueDate}
+                            tags={task.tags}
+                            isDone={task.isDone}
+                            isEvent={task.isEvent}
+                            onEdit={() => handleEdit(task)}
+                            onDelete={() => deleteNote(task)}
+                            onDoneNote={() => updateIsDone(task)}
+                            hovered={hoveredNoteId === task._id}
+                            onMouseEnter={() => setHoveredNoteId(task._id)}
+                            onMouseLeave={() => setHoveredNoteId(null)}
+                        />
+                        </div>
+                    ))}
+                    </>
+                ) : (
+                    <p className="text-lg text-gray-500 mt-4">No notes found matching your search</p>
+                )
+                )}
+                
                 {/* Tasks due on selected day */}
-                {Object.entries(suggestedNotes)
+                {!isSearch && Object.entries(suggestedNotes)
                 .filter(([dateString]) => {
                     if (!selectedDate) return true;
                     const noteDate = new Date(dateString).toDateString();
@@ -348,6 +359,35 @@ const Home = () => {
                     ))
                 ))
                 }
+
+                {!isSearch && selectedDate && allDoneNotes
+                .filter((task) => {
+                    const noteDate = new Date(task.whenDone).toDateString();
+                    const selectedDateStr = new Date(selectedDate).toDateString();
+                    return noteDate === selectedDateStr;
+                })
+                .map((task) => (
+                    <div key={task._id} className="h-full">
+                    <NoteCard 
+                        title={task.title}
+                        date={task.createdOn}
+                        content={task.content}
+                        priority={task.priority}
+                        dueDate={task.dueDate}
+                        tags={task.tags}
+                        isDone={task.isDone}
+                        isEvent={task.isEvent}
+                        onEdit={() => handleEdit(task)}
+                        onDelete={() => deleteNote(task)}
+                        onDoneNote={() => updateIsDone(task)}
+                        hovered={hoveredNoteId === task._id}
+                        onMouseEnter={() => setHoveredNoteId(task._id)}
+                        onMouseLeave={() => setHoveredNoteId(null)}
+                    />
+                    </div>
+                ))
+                }
+
             </div>
             </div> 
         

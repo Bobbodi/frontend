@@ -67,6 +67,7 @@ const Wellness = () => {
         await getUserInfo();
         await getAllJournal();
         await getAllMood();
+        await getAllSleep(); 
         // await setUpSleep(); // Run sequentially
         // if (allSleep.length > 0) { 
         //   calcStats(); 
@@ -241,7 +242,17 @@ const Wellness = () => {
         }
       }
     };
-  
+
+    const getAllSleep = async () => { 
+        try { 
+            const response = await axiosInstance.get("/get-all-sleep");
+            if (response.data && response.data.sleeps) { 
+                setAllSleep(response.data.sleeps);
+            }
+        } catch (error) { 
+            console.log("beep boop error time")
+        }
+    }
 
     
 
@@ -249,18 +260,18 @@ return (
   <div className=" bg-gray-50">
     <Navbarv3 userInfo={userInfo} />
     
-    <div className="mt-2 container mx-auto px-3 py-1">
+    <div className="mt-2 container mx-auto px-5 py-2">
       {/*The three sections: MOOD, SLEEP, JOURNALING */}
-      <div className="flex flex-col lg:flex-row gap-3">
+      <div className="flex flex-col lg:flex-row gap-5">
 
       {/* MOOD SECTION */}
       <div className="lg:w-1/3 w-full bg-white rounded-xl shadow-lg p-5">
-        <h1 className="text-2xl font-bold text-gray-800 mb-3 ">Mood</h1>
+        <h1 className="text-2xl font-bold text-purple-600 mb-4 ">Mood</h1>
         
         {/* Mood Rating */}
         <div className="mb-6">
           <h2 className="text-sm font-medium text-gray-500 mb-3">How are you feeling today?</h2>
-          <div className="flex justify-between grid grid-cols-5 gap-5">
+          <div className="ml-2 flex justify-between grid grid-cols-4 gap-5">
             {Object.entries(EMOJIS).map((emoji) => (
               
               <div key={emoji[1].name} className="relative inline-block group"> {/* Container with group class */}
@@ -292,7 +303,7 @@ return (
 
        
       {/* Recent Moods */}
-      <div className="mt-6" style={{ contain: 'paint' }}> 
+      <div className="mt-8" style={{ contain: 'paint' }}> 
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-medium text-gray-500 relative z-0"> 
             Recent moods
@@ -318,7 +329,7 @@ return (
         <div className="grid grid-cols-7 gap-2 relative z-10 mt-3 ml-3 mr-3"> {/* Added z-10 */}
           {allMoodsLength > 0 ? (
             allMoods
-              .slice(0, 14)
+              .slice(0, 7)
               .map((moodLog) => (
               <div 
                 key={moodLog._id} 
@@ -346,7 +357,7 @@ return (
 
       {/* ---------------------SLEEP SECTION START -------------------------*/}
       <div className="lg:w-1/3 w-full bg-white rounded-xl shadow-lg p-5">
-        <h1 className="text-2xl font-bold text-gray-800 mb-3">Sleep</h1>
+        <h1 className="text-2xl font-bold text-blue-600 mb-3">Sleep</h1>
         {/* <h2 className="text-sm font-medium text-gray-500 mb-2">Last night </h2> */}
         {/* Sleep Time Input */}
         <div className="bg-blue-50 rounded-xl p-3">
@@ -437,7 +448,7 @@ return (
 
       {/* journaling section */}
       <div className="lg:w-1/3 w-full bg-white rounded-xl shadow-lg p-5">
-        <h1 className="text-2xl font-bold text-gray-800 mb-3">Journal</h1>
+        <h1 className="text-2xl font-bold text-amber-500 mb-3">Journal</h1>
 
         {/*Add a new journal entry*/}
         <div> 
@@ -459,10 +470,10 @@ return (
         <h3 className="text-sm font-medium text-gray-500 relative z-0 mt-4 mb-2"> 
             Past Journals
           </h3>
-        <div className="mt-2 max-h-40 overflow-y-auto ">
+        <div className="mt-2 max-h-33 overflow-y-auto ">
           
         {allJournal.length > 0 ? (
-          <div className="grid grid-cols-3 gap-4 mb-3">
+          <div className="grid grid-cols-4 gap-2">
             {allJournal.map((item) => (
               <JournalCard 
                 key={item._id}

@@ -139,7 +139,7 @@ return (
         onClick={handleAddNode}
         aria-label="Save"
       >
-        <MdCheck className="text-xl text-green" />
+        <MdCheck className="text-xl text-amber-500" />
       </button>
     </div>
 

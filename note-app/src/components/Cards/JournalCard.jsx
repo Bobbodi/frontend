@@ -5,6 +5,7 @@ import moment from "moment";
 import { useState } from 'react';
 import Toast from '../ToastMessage/Toast';
 import { FaEnvelope, FaEnvelopeOpen } from "react-icons/fa6";
+import { GiSpellBook } from "react-icons/gi";
 
 const JournalCard = ({
     key, date, entry, hovered, onMouseEnter, onMouseLeave, onDelete }) => {
@@ -51,15 +52,23 @@ const JournalCard = ({
                 }}
             >
                 {/* Envelope container with subtle animation */}
-                <div className="relative w-12 h-12 flex items-center justify-center">
-                    <FaEnvelope className={`absolute text-green-500 text-2xl transition-all duration-300 ${hovered ? 'opacity-0 scale-90' : 'opacity-100 scale-100'}`} />
-                    <FaEnvelopeOpen className={`absolute text-yellow-500 text-2xl transition-all duration-300 ${hovered ? 'opacity-100 scale-110' : 'opacity-0 scale-90'}`} />
-                </div>
+                <div className="relative w-9 h-9 flex items-center justify-center">
+  <GiSpellBook className={`
+    absolute text-amber-500 text-3xl 
+    transition-all duration-400 ease-[cubic-bezier(0.68,-0.55,0.27,1.55)] 
+    'opacity-0 scale-100 -rotate-12' : 'opacity-100 scale-100'}
+  `} />
+  <GiSpellBook className={`
+    absolute text-slate-700 text-3xl 
+    transition-all duration-400 ease-[cubic-bezier(0.68,-0.55,0.27,1.55)] 
+    ${hovered ? 'opacity-100 scale-110 rotate-0' : 'opacity-0 scale-90 rotate-12'}
+  `} />
+</div>
 
                 {/* Date with subtle hover effect */}
-                <p className="text-xs text-gray-500 mt-1 transition-colors hover:text-gray-700">
+                {/* <p className="text-xs text-gray-500 mt-1 transition-colors hover:text-gray-700">
                     {moment(date).format('MMM D, YYYY')}
-                </p>
+                </p> */}
             </div>
 
             <Modal

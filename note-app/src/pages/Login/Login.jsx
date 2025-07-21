@@ -1,13 +1,19 @@
 import React from "react";
 import Navbarv2 from "../../components/Navbarv2";
 import PasswordInput from "../../components/Input/PasswordInput";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { validateEmail } from "../../utils/helper";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosInstance";
 
+import { Room6Model } from '../../components/3D models/Room6Model.jsx';
+import { RainbowDragonModel } from '../../components/3D models/RainbowDragonModel.jsx';
+
+import { Canvas } from "@react-three/fiber";
+import { Environment, OrbitControls, ContactShadows } from "@react-three/drei"
 
 const Login = () => {
+
 
     const [email, setEmail] = React.useState("")
     const [password, setPassword] = React.useState("")
@@ -56,39 +62,80 @@ const Login = () => {
 
     };
 
+    const AVATAR_MODELS = { 
+      8: {
+            "model": RainbowDragonModel, 
+            "position": [-4, -0.5, 0], 
+            "rotation": [0.3, 1, 0.2], 
+            "scale": [1.2, 1.2, 1.2]
+          },
+    }
+
+    const ROOM_MODELS = { 
+        6: { 
+            "model": Room6Model, 
+            "position": [0, -1, 0], 
+            "rotation": [0, -2.4, 0], 
+            "scale": [0.0018, 0.0018, 0.0018]
+          },
+        }
+
+    const UserAvatar = ({ avatarId }) => { 
+        const avatarRef = useRef(); 
+        const avatar = avatarId ? AVATAR_MODELS[avatarId] : AVATAR_MODELS[2];
+        const AvatarModel = avatar.model || AVATAR_MODELS[1].model; //fallback to default if not specified
+        return ( 
+          <group ref = {avatarRef} position = {avatar.position} rotation = {avatar.rotation}> 
+            <AvatarModel scale={avatar.scale}/>
+          </group>
+        )
+      }
+    
+    const UserRoom = ({ roomId }) => { 
+            const roomRef = useRef(); 
+            const room = ROOM_MODELS[roomId];
+            const RoomModel = room.model || ROOM_MODELS[1].model; //fallback to default if not specified
+            return ( 
+            <group ref = {roomRef} position = {room.position} rotation = {room.rotation}> 
+                <RoomModel scale={room.scale}/>
+            </group>
+            )
+        }
+
     return (
   <>
     <Navbarv2 />
     
-    <div className="flex flex-col md:flex-row min-h-screen">
+    <div className="flex flex-col md:flex-row h-[calc(100vh-83px)] bg-yellow-50">
       {/* Left Side - About Section (50% width) */}
-      <div className="w-full md:w-1/2 bg-white flex items-center justify-center p-10">
-        <div className="max-w-md">
-          <h1 className="text-4xl font-bold mb-6 text-yellow">Welcome to SlayFocus</h1>
-          <p className="text-xl mb-6">
-            A fun website to make studying fun
-          </p>
-          <ul className="space-y-3">
-            <li className="flex items-center">
-              <span className="mr-2">✓</span> Study planning
-            </li>
-            <li className="flex items-center">
-              <span className="mr-2">✓</span> Study rooms
-            </li>
-            <li className="flex items-center">
-              <span className="mr-2">✓</span> Wellness tools
-            </li>
-          </ul>
+
+    <div className="w-[100%] flex items-center justify-center">
+      <Canvas camera={{ fov: 8, position: [0, 2, 70]}}>
+          <ambientLight intensity={0.5} />
+          <OrbitControls
+            enableZoom={true}
+            minAzimuthAngle={-Math.PI}
+            // maxAzimuthAngle={Math.PI}
+            minPolarAngle={Math.PI / 2.5}
+            maxPolarAngle={Math.PI}
+          />
           
-        </div>
+            <UserAvatar 
+            key = {new Date()}
+            avatarId = {8}
+          />
+          
+          <Environment preset="sunset" />
+          
+        </Canvas>
       </div>
 
       {/* Right Side - Login Form (50% width) */}
-      <div className="w-full md:w-1/2 bg-gray-50 flex items-center justify-center p-6">
-        <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+      <div className="absolute right-6 bottom-6 w-3/8 flex items-center justify-center p-6">
+        <div className="bg-white/60 backdrop-blur-sm rounded-xl shadow-lg p-8 w-full max-w-md">
           <form onSubmit={handleLogin}>
             <h4 className="text-2xl font-bold mb-6 text-gray-800">Login</h4>
-            <h4 className="text-xl mb-6 text-gray-800">Email: bob@gmail.com, Pwd: bob</h4>
+            {/* <h4 className="text-xl mb-6 text-gray-800">Email: bob@gmail.com, Pwd: bob</h4> */}
             <div className="mb-4">
               <input
                 type="email"
