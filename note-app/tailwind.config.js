@@ -2,12 +2,13 @@
 module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
+    "./public/index.html"
   ],
   theme: {
     extend: {
       colors: {
         // Your custom OKLCH colors
-        red: 'oklch(64.76% 0.204 11.07)',
+        customred: 'oklch(64.76% 0.204 11.07)',
         yellow: 'oklch(88.03% 0.135 86.06)',
         green: 'oklch(77.75% 0.160 166.57)',
         blue: 'oklch(59.23% 0.112 227.97)',
